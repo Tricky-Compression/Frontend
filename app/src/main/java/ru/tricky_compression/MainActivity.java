@@ -1,23 +1,38 @@
 package ru.tricky_compression;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+
+    private FileChooserFragment fragment;
+    private Button buttonShowInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.main_screen);
 
-        Button uploadButton = findViewById(R.id.btn_upload);
-        uploadButton.setOnClickListener(view -> {
-            Intent intent = new Intent(this, MyAwesomeActivity.class);
-            startActivity(intent);
+        FragmentManager fragmentManager = this.getSupportFragmentManager();
+        this.fragment = (FileChooserFragment) fragmentManager.findFragmentById(R.id.fragment_fileChooser);
+
+        this.buttonShowInfo = this.findViewById(R.id.button_showInfo);
+
+        this.buttonShowInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showInfo();
+            }
         });
+    }
+
+    private void showInfo()  {
+        String path = this.fragment.getPath();
+        Toast.makeText(this, "Path: " + path, Toast.LENGTH_LONG).show();
     }
 }

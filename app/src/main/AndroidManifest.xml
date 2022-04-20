@@ -21,10 +21,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".MyAwesomeActivity">
-
-        </activity>
-
 
     </application>
 
