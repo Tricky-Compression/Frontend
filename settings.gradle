@@ -14,4 +14,3 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Tricky Compression"
 include ':app'
-include ':FIleChooser'
