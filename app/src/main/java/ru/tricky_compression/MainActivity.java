@@ -1,17 +1,15 @@
 package ru.tricky_compression;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
-
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 
 public class MainActivity extends AppCompatActivity {
 
     private FileChooserFragment fragment;
-    private Button buttonShowInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,14 +19,9 @@ public class MainActivity extends AppCompatActivity {
         FragmentManager fragmentManager = this.getSupportFragmentManager();
         this.fragment = (FileChooserFragment) fragmentManager.findFragmentById(R.id.fragment_fileChooser);
 
-        this.buttonShowInfo = this.findViewById(R.id.button_showInfo);
+        Button buttonShowInfo = this.findViewById(R.id.button_showInfo);
 
-        this.buttonShowInfo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showInfo();
-            }
-        });
+        buttonShowInfo.setOnClickListener(view -> showInfo());
     }
 
     private void showInfo()  {
