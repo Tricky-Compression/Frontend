@@ -9,11 +9,11 @@
     android:paddingTop="5sp"
     android:paddingRight="5sp"
     android:paddingBottom="5sp"
-    tools:context=".MainActivity" >
+    tools:context=".view.MainActivity" >
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_fileChooser"
-        android:name="ru.tricky_compression.FileChooserFragment"
+        android:name="ru.tricky_compression.view.FileChooserFragment"
         android:layout_width="0dp"
         android:layout_height="45dp"
         android:layout_marginStart="16dp"
@@ -33,6 +33,17 @@
         android:layout_marginTop="16dp"
         android:text="@string/show_info"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_fileChooser" />
+
+    <Button
+        android:id="@+id/button_greeting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/greeting"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.933"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/fragment_fileChooser" />
 </androidx.constraintlayout.widget.ConstraintLayout>

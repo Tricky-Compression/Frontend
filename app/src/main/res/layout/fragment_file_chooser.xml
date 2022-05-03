@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:dividerPadding="5sp"
-    tools:context=".FileChooserFragment">
+    tools:context=".view.FileChooserFragment">
 
     <EditText
         android:id="@+id/editText_path"

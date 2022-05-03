@@ -1,4 +1,4 @@
-package ru.tricky_compression;
+package ru.tricky_compression.view;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;

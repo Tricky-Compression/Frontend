@@ -1,4 +1,4 @@
-package ru.tricky_compression;
+package ru.tricky_compression.view;
 
 import android.Manifest;
 import android.app.Activity;
@@ -18,10 +18,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import ru.tricky_compression.R;
+
 public class FileChooserFragment extends Fragment {
 
     private static final int MY_REQUEST_CODE_PERMISSION = 1000;
-    private static final int MY_RESULT_CODE_FILECHOOSER = 2000;
+    private static final int MY_RESULT_CODE_FILE_CHOOSER = 2000;
 
     private Button buttonBrowse;
     private EditText editTextPath;
@@ -53,10 +55,10 @@ public class FileChooserFragment extends Fragment {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) { // Level 23
 
             // Check if we have Call permission
-            int permisson = ActivityCompat.checkSelfPermission(this.getContext(),
+            int permission = ActivityCompat.checkSelfPermission(this.getContext(),
                     Manifest.permission.READ_EXTERNAL_STORAGE);
 
-            if (permisson != PackageManager.PERMISSION_GRANTED) {
+            if (permission != PackageManager.PERMISSION_GRANTED) {
                 // If don't have permission so prompt the user.
                 this.requestPermissions(
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
@@ -75,7 +77,7 @@ public class FileChooserFragment extends Fragment {
         chooseFileIntent.addCategory(Intent.CATEGORY_OPENABLE);
 
         chooseFileIntent = Intent.createChooser(chooseFileIntent, "Choose a file");
-        startActivityForResult(chooseFileIntent, MY_RESULT_CODE_FILECHOOSER);
+        startActivityForResult(chooseFileIntent, MY_RESULT_CODE_FILE_CHOOSER);
     }
 
     // When you have the request results
@@ -112,7 +114,7 @@ public class FileChooserFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case MY_RESULT_CODE_FILECHOOSER:
+            case MY_RESULT_CODE_FILE_CHOOSER:
                 if (resultCode == Activity.RESULT_OK ) {
                     if(data != null)  {
                         Uri fileUri = data.getData();
