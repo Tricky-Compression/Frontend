@@ -36,7 +36,7 @@ public abstract class Model {
         }
     };
 
-    protected abstract void sendGreeting();
+    public abstract void sendGreeting();
 
-    protected abstract void uploadSingleFile(String filename);
+    public abstract void uploadSingleFile(String filename);
 }

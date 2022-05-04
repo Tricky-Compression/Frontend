@@ -1,7 +1,11 @@
 package ru.tricky_compression;
 
 public interface View {
-    String getText();
+    String getPath();
 
-    void setText(String text);
+    default void cleanPath() {
+        setPath("");
+    }
+
+    void setPath(String text);
 }

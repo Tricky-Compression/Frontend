@@ -5,7 +5,6 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import ru.tricky_compression.Model;
 import ru.tricky_compression.model.ModelImpl;
 import ru.tricky_compression.Presenter;
 import ru.tricky_compression.R;
@@ -23,27 +22,26 @@ public class MainActivity extends AppCompatActivity implements View {
     }
 
     private void init() {
-        Model model = new ModelImpl();
-        presenter = new Presenter(model);
-        presenter.attachView(this);
+        presenter = new Presenter(new ModelImpl(), this);
         findViewById(R.id.button_greeting).setOnClickListener(view -> presenter.sendGreeting());
-        findViewById(R.id.button_showInfo).setOnClickListener(view -> presenter.uploadSingleFile());
+        findViewById(R.id.button_uploadFile).setOnClickListener(view -> presenter.uploadSingleFile());
+        findViewById(R.id.button_downloadFile).setOnClickListener(view -> presenter.downloadSingleFile());
     }
 
     @Override
     protected void onDestroy() {
-        presenter.detachView();
+        presenter.onDestroy();
         super.onDestroy();
     }
 
     @Override
-    public String getText() {
+    public String getPath() {
         EditText editText = findViewById(R.id.editText_path);
         return editText.getText().toString();
     }
 
     @Override
-    public void setText(String text) {
+    public void setPath(String text) {
         EditText editText = findViewById(R.id.editText_path);
         editText.setText(text);
     }

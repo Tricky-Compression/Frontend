@@ -34,7 +34,7 @@ public final class ModelImpl extends Model {
         try {
             data = Arrays.toString(Files.readAllBytes(Paths.get(filename)));
         } catch (IOException e) {
-            Log.i("\t", String.format("No file called \"%s\"", filename));
+            Log.i("\t", String.format("There is no file called \"%s\"", filename));
             return;
         }
         String json = String.format("{ \"filename\": \"%s\", \"data\": \"%s\" }", filename, data);

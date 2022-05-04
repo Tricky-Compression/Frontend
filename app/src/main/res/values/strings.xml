@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Tricky Compression</string>
-    <string name="show_info">Show Info</string>
     <string name="browse">Browse</string>
     <string name="greeting">Greeting</string>
+    <string name="upload_file">Upload file</string>
+    <string name="download_file">Download file</string>
 </resources>

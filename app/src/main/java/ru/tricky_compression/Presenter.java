@@ -4,16 +4,13 @@ public class Presenter {
     private final Model model;
     private View view;
 
-    public Presenter(Model model) {
+    public Presenter(Model model, View view) {
         this.model = model;
+        this.view = view;
         System.out.println(" ----- Presenter was created ----- ");
     }
 
-    public void attachView(View view) {
-        this.view = view;
-    }
-
-    public void detachView() {
+    public void onDestroy() {
         view = null;
     }
 
@@ -22,7 +19,11 @@ public class Presenter {
     }
 
     public void uploadSingleFile() {
-        model.uploadSingleFile(view.getText());
-        view.setText("");
+        model.uploadSingleFile(view.getPath());
+        view.cleanPath();
+    }
+
+    public void downloadSingleFile() {
+        // TODO
     }
 }
