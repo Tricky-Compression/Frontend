@@ -30,14 +30,14 @@ public final class ModelImpl extends Model {
     @Override
     public void uploadSingleFile(String filename) {
         String url = String.format("%s/api/upload/single_file", BASE_URL);
-        String data;
+        byte[] data;
         try {
-            data = Arrays.toString(Files.readAllBytes(Paths.get(filename)));
+            data = Files.readAllBytes(Paths.get(filename));
         } catch (IOException e) {
             Log.i("\t", String.format("There is no file called \"%s\"", filename));
             return;
         }
-        String json = String.format("{ \"filename\": \"%s\", \"data\": \"%s\" }", filename, data);
+        String json = String.format("{ \"filename\": \"%s\", \"data\": %s }", filename, Arrays.toString(data));
         RequestBody requestBody = RequestBody.create(json, JSON_FORMAT);
         Log.i("\t", json);
         Request request = new Request.Builder().url(url).post(requestBody).build();
