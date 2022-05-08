@@ -2,10 +2,10 @@ package ru.tricky_compression.view;
 
 import android.os.Bundle;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import ru.tricky_compression.model.ModelImpl;
 import ru.tricky_compression.Presenter;
 import ru.tricky_compression.R;
 import ru.tricky_compression.View;
@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity implements View {
     }
 
     private void init() {
-        presenter = new Presenter(new ModelImpl(), this);
+        presenter = new Presenter(this);
         findViewById(R.id.button_greeting).setOnClickListener(view -> presenter.sendGreeting());
         findViewById(R.id.button_uploadFile).setOnClickListener(view -> presenter.uploadSingleFile());
         findViewById(R.id.button_downloadFile).setOnClickListener(view -> presenter.downloadSingleFile());
@@ -35,14 +35,17 @@ public class MainActivity extends AppCompatActivity implements View {
     }
 
     @Override
+    public void printInfo(String text) {
+        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
     public String getPath() {
-        EditText editText = findViewById(R.id.editText_path);
-        return editText.getText().toString();
+        return ((EditText) findViewById(R.id.editText_path)).getText().toString();
     }
 
     @Override
     public void setPath(String text) {
-        EditText editText = findViewById(R.id.editText_path);
-        editText.setText(text);
+        ((EditText) findViewById(R.id.editText_path)).setText(text);
     }
 }

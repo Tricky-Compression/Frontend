@@ -1,21 +1,29 @@
 package ru.tricky_compression;
 
+import ru.tricky_compression.model.ModelImpl;
+
 public class Presenter {
-    private final Model model;
+    private Model model;
     private View view;
 
-    public Presenter(Model model, View view) {
-        this.model = model;
+    public Presenter(View view) {
+        model = new ModelImpl(this);
         this.view = view;
         System.out.println(" ----- Presenter was created ----- ");
     }
 
     public void onDestroy() {
+        model = null;
         view = null;
+    }
+
+    public void printInfo(String text) {
+        view.printInfo(text);
     }
 
     public void sendGreeting() {
         model.sendGreeting();
+        view.cleanPath();
     }
 
     public void uploadSingleFile() {
@@ -24,6 +32,7 @@ public class Presenter {
     }
 
     public void downloadSingleFile() {
-        // TODO
+        model.downloadSingleFile(view.getPath());
+        view.cleanPath();
     }
 }
