@@ -20,42 +20,73 @@ import okhttp3.ResponseBody;
 import ru.tricky_compression.Model;
 import ru.tricky_compression.Presenter;
 
-public final class ModelImpl extends Model {
+public class ModelImpl extends Model {
+    private final Presenter presenter;
     private final OkHttpClient client;
-    protected final Callback callback = new Callback() {
-        @Override
-        public void onResponse(@NonNull Call call, @NonNull Response response) {
-            ResponseBody responseBody = response.body();
-            try {
-                if (responseBody != null) {
-                    Log.i("\t", responseBody.string());
-                }
-            } catch (IOException e) {
-                Log.i("\t", e.getMessage());
-            }
-        }
-
+    private final Callback GETCallback = new Callback() {
         @Override
         public void onFailure(@NonNull Call call, @NonNull IOException e) {
             presenter.printInfo(e.getMessage());
         }
+
+        @Override
+        public void onResponse(@NonNull Call call, @NonNull Response response) {
+            try (ResponseBody responseBody = response.body()) {
+                if (responseBody == null) {
+                    return;
+                }
+                Log.i("response", responseBody.string());
+                byte[] data = gson.fromJson(responseBody.string(), byte[].class);
+                data = Compressor.decompress(data);
+                Log.i("\t", Arrays.toString(data));
+            } catch (IOException e) {
+                Log.i("\t", e.getMessage());
+            }
+        }
     };
-    private final Presenter presenter;
+    private final Callback POSTCallback = new Callback() {
+        @Override
+        public void onFailure(@NonNull Call call, @NonNull IOException e) {
+            presenter.printInfo(e.getMessage());
+        }
+
+        @Override
+        public void onResponse(@NonNull Call call, @NonNull Response response) {
+            try (ResponseBody responseBody = response.body()) {
+                if (responseBody == null) {
+                    return;
+                }
+                Log.i("\t", responseBody.string());
+            } catch (IOException e) {
+                Log.i("\t", e.getMessage());
+            }
+        }
+    };
 
     public ModelImpl(Presenter presenter) {
-        client = new OkHttpClient();
         this.presenter = presenter;
+        client = new OkHttpClient();
+        ping();
         System.out.println(" ----- Model was created ----- ");
     }
 
-    @Override
-    public void sendGreeting() {
+    public void ping() {
         HttpUrl url = getBaseUrl()
                 .addPathSegment("api")
                 .addPathSegments("greeting")
                 .build();
         Request request = new Request.Builder().url(url).build();
-        client.newCall(request).enqueue(callback);
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                presenter.printInfo(e.getMessage());
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                presenter.printInfo(String.valueOf(response.code()));
+            }
+        });
     }
 
     @Override
@@ -73,10 +104,14 @@ public final class ModelImpl extends Model {
             return;
         }
 
-        String json = String.format("{ \"filename\": \"%s\", \"data\": %s }", filename, Arrays.toString(data));
+        String json = String.format(
+                "{ \"filename\": \"%s\", \"data\": %s }",
+                filename,
+                Arrays.toString(Compressor.compress(data))
+        );
         RequestBody requestBody = RequestBody.create(json, JSON_FORMAT);
         Request request = new Request.Builder().url(url).post(requestBody).build();
-        client.newCall(request).enqueue(callback);
+        client.newCall(request).enqueue(POSTCallback);
     }
 
     @Override
@@ -87,6 +122,6 @@ public final class ModelImpl extends Model {
                 .addQueryParameter("filename", filename)
                 .build();
         Request request = new Request.Builder().url(url).build();
-        client.newCall(request).enqueue(callback);
+        client.newCall(request).enqueue(GETCallback);
     }
 }

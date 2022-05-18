@@ -23,9 +23,9 @@ public class MainActivity extends AppCompatActivity implements View {
 
     private void init() {
         presenter = new Presenter(this);
-        findViewById(R.id.button_greeting).setOnClickListener(view -> presenter.sendGreeting());
-        findViewById(R.id.button_uploadFile).setOnClickListener(view -> presenter.uploadSingleFile());
-        findViewById(R.id.button_downloadFile).setOnClickListener(view -> presenter.downloadSingleFile());
+        findViewById(R.id.button_upload).setOnClickListener(view -> presenter.uploadSingleFile());
+        findViewById(R.id.button_read).setOnClickListener(view -> presenter.readFile());
+        findViewById(R.id.button_download).setOnClickListener(view -> presenter.downloadSingleFile());
     }
 
     @Override
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements View {
 
     @Override
     public void printInfo(String text) {
-        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+        runOnUiThread(() -> Toast.makeText(this, text, Toast.LENGTH_SHORT).show());
     }
 
     @Override

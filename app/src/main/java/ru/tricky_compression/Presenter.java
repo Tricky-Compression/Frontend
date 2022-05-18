@@ -21,14 +21,13 @@ public class Presenter {
         view.printInfo(text);
     }
 
-    public void sendGreeting() {
-        model.sendGreeting();
-        view.cleanPath();
-    }
-
     public void uploadSingleFile() {
         model.uploadSingleFile(view.getPath());
         view.cleanPath();
+    }
+
+    public void readFile() {
+        view.printInfo("TODO");
     }
 
     public void downloadSingleFile() {

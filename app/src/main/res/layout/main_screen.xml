@@ -13,35 +13,35 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        tools:layout="@layout/fragment_file_chooser"/>
+        tools:layout="@layout/fragment_file_chooser" />
 
     <TableRow
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <Button
-            android:id="@+id/button_greeting"
+            android:id="@+id/button_upload"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:text="@string/greeting" />
+            android:text="@string/upload" />
 
         <Button
-            android:id="@+id/button_uploadFile"
+            android:id="@+id/button_read"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:text="@string/upload_file" />
+            android:text="@string/read" />
 
         <Button
-            android:id="@+id/button_downloadFile"
+            android:id="@+id/button_download"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:text="@string/download_file" />
+            android:text="@string/download" />
     </TableRow>
 
 </LinearLayout>
