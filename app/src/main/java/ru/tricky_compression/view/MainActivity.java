@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements View {
     private void init() {
         presenter = new Presenter(this);
         findViewById(R.id.button_upload).setOnClickListener(view -> presenter.uploadSingleFile());
-        findViewById(R.id.button_read).setOnClickListener(view -> presenter.readFile());
+        findViewById(R.id.button_read).setOnClickListener(view -> presenter.readFiles());
         findViewById(R.id.button_download).setOnClickListener(view -> presenter.downloadSingleFile());
     }
 

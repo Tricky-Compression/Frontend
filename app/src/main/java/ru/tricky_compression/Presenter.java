@@ -26,8 +26,8 @@ public class Presenter {
         view.cleanPath();
     }
 
-    public void readFile() {
-        view.printInfo("TODO");
+    public void readFiles() {
+        model.readAllFiles();
     }
 
     public void downloadSingleFile() {

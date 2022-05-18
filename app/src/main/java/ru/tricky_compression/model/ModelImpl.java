@@ -124,4 +124,24 @@ public class ModelImpl extends Model {
         Request request = new Request.Builder().url(url).build();
         client.newCall(request).enqueue(GETCallback);
     }
+
+    @Override
+    public void readAllFiles() {
+        HttpUrl url = getBaseUrl()
+                .addPathSegment("api")
+                .addPathSegments("get_list_files")
+                .build();
+
+        Request request = new Request.Builder().url(url).build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                Log.i("Read files", response.body().string());
+            }
+        });
+    }
 }

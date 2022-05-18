@@ -18,4 +18,6 @@ public abstract class Model {
     public abstract void uploadSingleFile(String filename);
 
     public abstract void downloadSingleFile(String filename);
+
+    public abstract void readAllFiles();
 }
