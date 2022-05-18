@@ -25,6 +25,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_16
         targetCompatibility JavaVersion.VERSION_16
     }
+    namespace 'ru.tricky_compression'
 }
 
 dependencies {
