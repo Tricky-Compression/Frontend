@@ -2,6 +2,8 @@ package ru.tricky_compression;
 
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
+
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 

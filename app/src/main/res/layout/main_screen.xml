@@ -15,6 +15,12 @@
         android:layout_margin="8dp"
         tools:layout="@layout/fragment_file_chooser" />
 
+    <ListView
+        android:id="@+id/list"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent">
+    </ListView>
+
     <TableRow
         android:layout_width="match_parent"
         android:layout_height="wrap_content">

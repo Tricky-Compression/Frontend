@@ -131,6 +131,7 @@ public class FileUtils {
                 } else if ("audio".equals(type)) {
                     contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
                 }
+
                 selection = "_id=?";
                 selectionArgs = new String[]{split[1]};
 

@@ -1,12 +1,14 @@
 package ru.tricky_compression.model;
 
 import android.util.Log;
+import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -105,7 +107,7 @@ public class ModelImpl extends Model {
         try {
             fileData.setData(Files.readAllBytes(Paths.get(filename)));
         } catch (IOException e) {
-            presenter.printInfo(e.getMessage());
+            presenter.printInfo("BEBRA " + e.getMessage());
             return;
         }
 
@@ -142,7 +144,13 @@ public class ModelImpl extends Model {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                Log.i("Read files", response.body().string());
+                String [] display = response
+                        .body()
+                        .string()
+                        .split(":");
+
+                Log.i("TEST", display[0]);
+                presenter.passFileNames(display);
             }
         });
     }

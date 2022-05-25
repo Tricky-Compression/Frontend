@@ -1,5 +1,7 @@
 package ru.tricky_compression;
 
+import java.util.List;
+
 public interface View {
     void printInfo(String text);
 
@@ -10,4 +12,6 @@ public interface View {
     }
 
     void setPath(String text);
+
+    void printFileNames(String[] toDisplay);
 }

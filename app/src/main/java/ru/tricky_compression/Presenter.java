@@ -1,5 +1,7 @@
 package ru.tricky_compression;
 
+import java.util.List;
+
 import ru.tricky_compression.model.ModelImpl;
 
 public class Presenter {
@@ -28,6 +30,10 @@ public class Presenter {
 
     public void readFiles() {
         model.readAllFiles();
+    }
+
+    public void passFileNames(String[] filenames) {
+        view.printFileNames(filenames);
     }
 
     public void downloadSingleFile() {
