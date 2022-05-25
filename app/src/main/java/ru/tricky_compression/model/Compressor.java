@@ -1,40 +1,24 @@
 package ru.tricky_compression.model;
 
-import com.github.luben.zstd.Zstd;
-import com.github.luben.zstd.ZstdInputStream;
-import com.github.luben.zstd.ZstdOutputStream;
+import android.util.Log;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import com.github.luben.zstd.Zstd;
 
 public class Compressor {
     private static final int LEVEL = Zstd.maxCompressionLevel();
 
     public static byte[] compress(byte[] input) {
-        int size = (int) Zstd.compressBound(input.length);
-        try (var os = new ByteArrayOutputStream(size);
-             var zos = new ZstdOutputStream(os).setLevel(LEVEL)) {
-            zos.write(input);
-            zos.close();
-            return os.toByteArray();
-        } catch (IOException ignored) {
-            return null;
-        }
+        var start = System.nanoTime();
+        byte[] output = Zstd.compress(input, LEVEL);
+        Log.i("compress time", String.valueOf(System.nanoTime() - start));
+        return output;
     }
 
     public static byte[] decompress(byte[] input) {
+        var start = System.nanoTime();
         int size = (int) Zstd.decompressedSize(input);
-        try (var is = new ByteArrayInputStream(input);
-             var zis = new ZstdInputStream(is)) {
-            byte[] output = new byte[size];
-            if (zis.read(output) != size) {
-                return null;
-            }
-            zis.close();
-            return output;
-        } catch (IOException ignored) {
-            return null;
-        }
+        byte[] output = Zstd.decompress(input, size);
+        Log.i("decompress time", String.valueOf(System.nanoTime() - start));
+        return output;
     }
 }

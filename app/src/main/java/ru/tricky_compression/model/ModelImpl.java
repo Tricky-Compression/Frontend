@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -19,11 +18,13 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import ru.tricky_compression.Model;
 import ru.tricky_compression.Presenter;
+import ru.tricky_compression.entity.FileData;
+import ru.tricky_compression.entity.Timestamps;
 
 public class ModelImpl extends Model {
     private final Presenter presenter;
     private final OkHttpClient client;
-    private final Callback GETCallback = new Callback() {
+    private final Callback onUpload = new Callback() {
         @Override
         public void onFailure(@NonNull Call call, @NonNull IOException e) {
             presenter.printInfo(e.getMessage());
@@ -35,16 +36,15 @@ public class ModelImpl extends Model {
                 if (responseBody == null) {
                     return;
                 }
-                Log.i("response", responseBody.string());
-                byte[] data = gson.fromJson(responseBody.string(), byte[].class);
-                data = Compressor.decompress(data);
-                Log.i("\t", Arrays.toString(data));
+                Timestamps timestamps = gson.fromJson(responseBody.string(), Timestamps.class);
+                timestamps.setClientEnd();
+                Log.i("upload response", gson.toJson(timestamps));
             } catch (IOException e) {
-                Log.i("\t", e.getMessage());
+                Log.i("upload response error", e.getMessage());
             }
         }
     };
-    private final Callback POSTCallback = new Callback() {
+    private final Callback onDownload = new Callback() {
         @Override
         public void onFailure(@NonNull Call call, @NonNull IOException e) {
             presenter.printInfo(e.getMessage());
@@ -56,9 +56,12 @@ public class ModelImpl extends Model {
                 if (responseBody == null) {
                     return;
                 }
-                Log.i("\t", responseBody.string());
+                FileData fileData = gson.fromJson(responseBody.string(), FileData.class);
+                fileData.setData(Compressor.decompress(fileData.getData()));
+                fileData.getTimestamps().setClientEnd();
+                Log.i("download response", gson.toJson(fileData));
             } catch (IOException e) {
-                Log.i("\t", e.getMessage());
+                Log.i("download response error", e.getMessage());
             }
         }
     };
@@ -96,22 +99,21 @@ public class ModelImpl extends Model {
                 .addPathSegments("upload/single_file")
                 .build();
 
-        byte[] data;
+        FileData fileData = new FileData(filename);
+        fileData.getTimestamps().setClientStart();
+
         try {
-            data = Files.readAllBytes(Paths.get(filename));
+            fileData.setData(Files.readAllBytes(Paths.get(filename)));
         } catch (IOException e) {
             presenter.printInfo(e.getMessage());
             return;
         }
 
-        String json = String.format(
-                "{ \"filename\": \"%s\", \"data\": %s }",
-                filename,
-                Arrays.toString(Compressor.compress(data))
-        );
-        RequestBody requestBody = RequestBody.create(json, JSON_FORMAT);
+        fileData.setData(Compressor.compress(fileData.getData()));
+        RequestBody requestBody = RequestBody.create(gson.toJson(fileData), JSON_FORMAT);
+        Log.i("request", gson.toJson(fileData));
         Request request = new Request.Builder().url(url).post(requestBody).build();
-        client.newCall(request).enqueue(POSTCallback);
+        client.newCall(request).enqueue(onUpload);
     }
 
     @Override
@@ -122,7 +124,7 @@ public class ModelImpl extends Model {
                 .addQueryParameter("filename", filename)
                 .build();
         Request request = new Request.Builder().url(url).build();
-        client.newCall(request).enqueue(GETCallback);
+        client.newCall(request).enqueue(onDownload);
     }
 
     @Override
