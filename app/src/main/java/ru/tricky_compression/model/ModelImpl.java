@@ -1,14 +1,13 @@
 package ru.tricky_compression.model;
 
 import android.util.Log;
-import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.Arrays;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -96,6 +95,11 @@ public class ModelImpl extends Model {
 
     @Override
     public void uploadSingleFile(String filename) {
+        if (filename.isEmpty()) {
+            presenter.printInfo("Empty filename");
+            return;
+        }
+
         HttpUrl url = getBaseUrl()
                 .addPathSegment("api")
                 .addPathSegments("upload/single_file")
@@ -103,14 +107,13 @@ public class ModelImpl extends Model {
 
         FileData fileData = new FileData(filename);
         fileData.getTimestamps().setClientStart();
-
         try {
             fileData.setData(Files.readAllBytes(Paths.get(filename)));
         } catch (IOException e) {
-            presenter.printInfo("BEBRA " + e.getMessage());
+            presenter.printInfo(e.getMessage());
             return;
         }
-
+        fileData.setData(new byte[]{1, 2, 3, 4});
         fileData.setData(Compressor.compress(fileData.getData()));
         RequestBody requestBody = RequestBody.create(gson.toJson(fileData), JSON_FORMAT);
         Log.i("request", gson.toJson(fileData));
@@ -120,10 +123,16 @@ public class ModelImpl extends Model {
 
     @Override
     public void downloadSingleFile(String filename) {
+        if (filename.isEmpty()) {
+            presenter.printInfo("Empty filename");
+            return;
+        }
+
         HttpUrl url = getBaseUrl()
                 .addPathSegment("api")
                 .addPathSegments("download/single_file")
                 .addQueryParameter("filename", filename)
+                .addQueryParameter("clientStart", String.valueOf(System.nanoTime()))
                 .build();
         Request request = new Request.Builder().url(url).build();
         client.newCall(request).enqueue(onDownload);
@@ -133,7 +142,7 @@ public class ModelImpl extends Model {
     public void readAllFiles() {
         HttpUrl url = getBaseUrl()
                 .addPathSegment("api")
-                .addPathSegments("get_list_files")
+                .addPathSegment("get_list_files")
                 .build();
 
         Request request = new Request.Builder().url(url).build();
@@ -144,12 +153,8 @@ public class ModelImpl extends Model {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                String [] display = response
-                        .body()
-                        .string()
-                        .split(":");
-
-                Log.i("TEST", display[0]);
+                String[] display = response.body().string().split(":");
+                Log.i("TEST", Arrays.toString(display));
                 presenter.passFileNames(display);
             }
         });
