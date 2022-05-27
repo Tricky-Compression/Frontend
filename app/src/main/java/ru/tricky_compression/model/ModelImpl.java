@@ -17,12 +17,11 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import ru.tricky_compression.Model;
-import ru.tricky_compression.Presenter;
+import ru.tricky_compression.presenter.Presenter;
 import ru.tricky_compression.entity.FileData;
 import ru.tricky_compression.entity.Timestamps;
 
-public class ModelImpl extends Model {
+public class ModelImpl implements Model {
     private final Presenter presenter;
     private final OkHttpClient client;
     private final Callback onUpload = new Callback() {
@@ -75,7 +74,7 @@ public class ModelImpl extends Model {
     }
 
     public void ping() {
-        HttpUrl url = getBaseUrl()
+        HttpUrl url = Model.getBaseUrl()
                 .addPathSegment("api")
                 .addPathSegments("greeting")
                 .build();
@@ -100,7 +99,7 @@ public class ModelImpl extends Model {
             return;
         }
 
-        HttpUrl url = getBaseUrl()
+        HttpUrl url = Model.getBaseUrl()
                 .addPathSegment("api")
                 .addPathSegments("upload/single_file")
                 .build();
@@ -128,7 +127,7 @@ public class ModelImpl extends Model {
             return;
         }
 
-        HttpUrl url = getBaseUrl()
+        HttpUrl url = Model.getBaseUrl()
                 .addPathSegment("api")
                 .addPathSegments("download/single_file")
                 .addQueryParameter("filename", filename)
@@ -140,7 +139,7 @@ public class ModelImpl extends Model {
 
     @Override
     public void readAllFiles() {
-        HttpUrl url = getBaseUrl()
+        HttpUrl url = Model.getBaseUrl()
                 .addPathSegment("api")
                 .addPathSegment("get_list_files")
                 .build();

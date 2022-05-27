@@ -2,7 +2,6 @@ package ru.tricky_compression.view;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -10,11 +9,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.List;
-
-import ru.tricky_compression.Presenter;
+import ru.tricky_compression.presenter.Presenter;
 import ru.tricky_compression.R;
-import ru.tricky_compression.View;
 
 public class MainActivity extends AppCompatActivity implements View {
 

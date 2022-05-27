@@ -1,6 +1,4 @@
-package ru.tricky_compression;
-
-import java.util.List;
+package ru.tricky_compression.view;
 
 public interface View {
     void printInfo(String text);

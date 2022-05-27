@@ -1,8 +1,8 @@
-package ru.tricky_compression;
+package ru.tricky_compression.presenter;
 
-import java.util.List;
-
+import ru.tricky_compression.model.Model;
 import ru.tricky_compression.model.ModelImpl;
+import ru.tricky_compression.view.View;
 
 public class Presenter {
     private Model model;
