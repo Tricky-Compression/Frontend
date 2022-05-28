@@ -1,43 +1,21 @@
 package ru.tricky_compression.presenter;
 
-import ru.tricky_compression.model.Model;
-import ru.tricky_compression.model.ModelImpl;
-import ru.tricky_compression.view.View;
+public interface Presenter {
+    String networkErrorText = "Check internet connection and try again";
 
-public class Presenter {
-    private Model model;
-    private View view;
+    void onDestroy();
 
-    public Presenter(View view) {
-        model = new ModelImpl(this);
-        this.view = view;
-        System.out.println(" ----- Presenter was created ----- ");
+    void printInfo(String text);
+
+    default void printNetworkError() {
+        printInfo(networkErrorText);
     }
 
-    public void onDestroy() {
-        model = null;
-        view = null;
-    }
+    void uploadSingleFile();
 
-    public void printInfo(String text) {
-        view.printInfo(text);
-    }
+    void downloadSingleFile();
 
-    public void uploadSingleFile() {
-        model.uploadSingleFile(view.getPath());
-        view.cleanPath();
-    }
+    void readFilenames();
 
-    public void readFiles() {
-        model.readAllFiles();
-    }
-
-    public void passFileNames(String[] filenames) {
-        view.printFileNames(filenames);
-    }
-
-    public void downloadSingleFile() {
-        model.downloadSingleFile(view.getPath());
-        view.cleanPath();
-    }
+    void writeFilenames(String[] filenames);
 }

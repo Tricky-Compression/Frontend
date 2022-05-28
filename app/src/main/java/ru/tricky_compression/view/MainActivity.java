@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import ru.tricky_compression.presenter.Presenter;
+import ru.tricky_compression.presenter.PresenterImpl;
 import ru.tricky_compression.R;
 
 public class MainActivity extends AppCompatActivity implements View {
@@ -24,9 +25,9 @@ public class MainActivity extends AppCompatActivity implements View {
     }
 
     private void init() {
-        presenter = new Presenter(this);
+        presenter = new PresenterImpl(this);
         findViewById(R.id.button_upload).setOnClickListener(view -> presenter.uploadSingleFile());
-        findViewById(R.id.button_read).setOnClickListener(view -> presenter.readFiles());
+        findViewById(R.id.button_read).setOnClickListener(view -> presenter.readFilenames());
         findViewById(R.id.button_download).setOnClickListener(view -> presenter.downloadSingleFile());
     }
 
