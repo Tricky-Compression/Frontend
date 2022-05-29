@@ -1,22 +1,25 @@
 package ru.tricky_compression.entity;
 
-import java.nio.ByteBuffer;
-
 @SuppressWarnings("unused")
-public class ChunkData extends Timestamps {
-    private long chunkNumber;
+public class ChunkData {
+    private final Timestamps timestamps = new Timestamps();
+    private int chunkNumber;
     private String filename;
-    private ByteBuffer data;
+    private byte[] data;
 
     public ChunkData() {
     }
 
-    public ChunkData(long chunkNumber, String filename) {
+    public ChunkData(int chunkNumber, String filename) {
         this.chunkNumber = chunkNumber;
         this.filename = filename;
     }
 
-    public long getChunkNumber() {
+    public final Timestamps getTimestamps() {
+        return timestamps;
+    }
+
+    public int getChunkNumber() {
         return chunkNumber;
     }
 
@@ -24,19 +27,11 @@ public class ChunkData extends Timestamps {
         return filename;
     }
 
-    public ByteBuffer getData() {
+    public byte[] getData() {
         return data;
     }
 
-    public void setChunkNumber(long chunkNumber) {
-        this.chunkNumber = chunkNumber;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
-
-    public void setData(ByteBuffer data) {
+    public void setData(byte[] data) {
         this.data = data;
     }
 }

@@ -4,8 +4,6 @@ import android.util.Log;
 
 import com.github.luben.zstd.Zstd;
 
-import java.nio.ByteBuffer;
-
 public class Compressor {
     private static final int LEVEL = Zstd.maxCompressionLevel();
 
@@ -16,25 +14,10 @@ public class Compressor {
         return output;
     }
 
-    public static ByteBuffer compress(ByteBuffer input) {
-        var start = System.nanoTime();
-        ByteBuffer output = Zstd.compress(input, LEVEL);
-        Log.i("compress time", String.valueOf(System.nanoTime() - start));
-        return output;
-    }
-
     public static byte[] decompress(byte[] input) {
         var start = System.nanoTime();
         int size = (int) Zstd.decompressedSize(input);
         byte[] output = Zstd.decompress(input, size);
-        Log.i("decompress time", String.valueOf(System.nanoTime() - start));
-        return output;
-    }
-
-    public static ByteBuffer decompress(ByteBuffer input) {
-        var start = System.nanoTime();
-        int size = (int) Zstd.decompressedSize(input);
-        ByteBuffer output = Zstd.decompress(input, size);
         Log.i("decompress time", String.valueOf(System.nanoTime() - start));
         return output;
     }
