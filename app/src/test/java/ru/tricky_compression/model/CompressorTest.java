@@ -1,36 +1,32 @@
 package ru.tricky_compression.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.util.Random;
 
 public class CompressorTest {
-    private static final int LENGTH = 1000;
-    Random random;
+    private static final int MAX_TESTS = 10;
+    private static final int MAX_LENGTH = 1000;
+    private Random random;
 
     @BeforeEach
     public void initialize() {
         random = new Random();
     }
 
-    @Test
+    @Execution(ExecutionMode.CONCURRENT)
+    @RepeatedTest(MAX_TESTS)
     public void testIdentity() {
-        byte[] input = new byte[LENGTH];
+        int length = random.nextInt(MAX_LENGTH);
+        byte[] input = new byte[length];
         random.nextBytes(input);
-
         byte[] compressed = Compressor.compress(input);
-        if (compressed == null) {
-            fail();
-        }
-
         byte[] output = Compressor.decompress(compressed);
-        if (output == null) {
-            fail();
-        }
 
         assertEquals(input, output);
     }

@@ -25,7 +25,9 @@ import okhttp3.HttpUrl;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import ru.tricky_compression.entity.ChunkData;
+import ru.tricky_compression.entity.FileData;
 import ru.tricky_compression.entity.Timestamps;
+import ru.tricky_compression.utils.ByteBufferUtils;
 
 public class FileUploader {
     private static final int CHUNK_SIZE = 4096;
@@ -36,7 +38,7 @@ public class FileUploader {
         private final String filename;
         private final int chunkNumber;
         private final long offset;
-        private final long size;
+        private final int size;
         private final TrickyCallback callback;
 
         public UploadChunkTask(
@@ -44,7 +46,7 @@ public class FileUploader {
                 String filename,
                 int chunkNumber,
                 long offset,
-                long size,
+                int size,
                 TrickyCallback callback) {
             this.url = url;
             this.filename = filename;
@@ -58,14 +60,16 @@ public class FileUploader {
         public Boolean call() {
             try (FileChannel channel = FileChannel.open(Paths.get(filename), StandardOpenOption.READ)) {
                 ChunkData chunkData = new ChunkData(chunkNumber, filename);
-                chunkData.setClientStart();
-                chunkData.setData(channel.map(FileChannel.MapMode.READ_ONLY, offset, size));
-                chunkData.setData(Compressor.compress(chunkData.getData()));
+                chunkData.getTimestamps().setClientStart();
+                var buffer = channel.map(FileChannel.MapMode.READ_ONLY, offset, size);
+                chunkData.setData(ByteBufferUtils.toByteArray(buffer, size));
+//                chunkData.setData(Compressor.compress(chunkData.getData()));
                 if (callback.failed()) {
                     return false;
                 }
                 Model.post(url, chunkData, callback);
-                System.out.printf("Ended task %d\n", chunkNumber);
+                System.out.printf("Chunk #%d is sent\n", chunkNumber);
+                System.out.flush();
                 return true;
             } catch (IOException ignored) {
                 return false;
@@ -73,7 +77,7 @@ public class FileUploader {
         }
     }
 
-    public static final class TrickyCallback implements Callback {
+    private static final class TrickyCallback implements Callback {
         private final AtomicBoolean failure;
 
         public TrickyCallback() {
@@ -99,10 +103,8 @@ public class FileUploader {
                 return;
             }
             try (ResponseBody responseBody = response.body()) {
-                if (responseBody == null) {
-                    return;
-                }
                 Timestamps timestamps = gson.fromJson(responseBody.string(), Timestamps.class);
+                timestamps.setClientEnd();
                 Log.i("chunk upload response", gson.toJson(timestamps));
             } catch (IOException ignored) {
                 failure.compareAndSet(false, true);
@@ -110,13 +112,17 @@ public class FileUploader {
         }
     }
 
-    public static void upload(String filename) throws IOException {
+    public static void uploadSingleFile(HttpUrl url, String filename, Callback callback) throws IOException {
+        FileData fileData = new FileData(filename);
+        fileData.getTimestamps().setClientStart();
+        fileData.setData(Files.readAllBytes(Paths.get(filename)));
+//        fileData.setData(Compressor.compress(fileData.getData()));
+        Model.post(url, fileData, callback);
+    }
+
+    public static void upload(HttpUrl url, String filename) throws IOException {
         long fileSize = Files.size(Paths.get(filename));
         int numberOfTasks = (int) ((fileSize + CHUNK_SIZE - 1) / CHUNK_SIZE);
-        HttpUrl url = Model.getBaseUrl()
-                .addPathSegment("api")
-                .addPathSegments("upload/single_file")
-                .build();
         TrickyCallback callback = new TrickyCallback();
         new Thread(() -> {
             try {
@@ -125,24 +131,30 @@ public class FileUploader {
                 List<Future<Boolean>> results = new ArrayList<>(numberOfTasks);
                 for (int i = 0; i < numberOfTasks; ++i) {
                     long offset = (long) i * CHUNK_SIZE;
-                    long size = Math.min(CHUNK_SIZE, fileSize - offset);
+                    int size = (int) Math.min(CHUNK_SIZE, fileSize - offset);
                     Callable<Boolean> task = new UploadChunkTask(url, filename, i, offset, size, callback);
                     results.add(threadPool.submit(task));
                 }
 
+                boolean fail = false;
                 for (var result : results) {
                     try {
                         if (!result.get()) {
-                            threadPool.shutdownNow();
+                            fail = true;
                             break;
                         }
                     } catch (ExecutionException ignored) {
-                        threadPool.shutdownNow();
+                        fail = true;
                         break;
                     }
                 }
 
-                System.out.println("All chunks are sent");
+                if (fail) {
+                    threadPool.shutdownNow();
+                    Log.i("chunk upload", "uploading failed");
+                } else {
+                    System.out.printf("%d chunks are sent\n", numberOfTasks);
+                }
             } catch (InterruptedException ignored) {
             }
         }).start();

@@ -5,9 +5,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -37,7 +34,7 @@ public class ModelImpl implements Model {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                presenter.printInfo(e.getMessage());
+                presenter.printNetworkError();
             }
 
             @Override
@@ -47,10 +44,27 @@ public class ModelImpl implements Model {
         });
     }
 
+    public void upload(String filename) {
+        if (filename.isEmpty()) {
+            presenter.printInfo("Empty file name");
+            return;
+        }
+
+        HttpUrl url = Model.getBaseUrl()
+                .addPathSegment("api")
+                .addPathSegments("upload/chunk")
+                .build();
+        try {
+            FileUploader.upload(url, filename);
+        } catch (IOException e) {
+            presenter.printInfo(String.format("can't upload file %s", filename));
+        }
+    }
+
     @Override
     public void uploadSingleFile(String filename) {
         if (filename.isEmpty()) {
-            presenter.printInfo("Empty filename");
+            presenter.printInfo("Empty file name");
             return;
         }
 
@@ -58,41 +72,31 @@ public class ModelImpl implements Model {
                 .addPathSegment("api")
                 .addPathSegments("upload/single_file")
                 .build();
-
-        FileData fileData = new FileData(filename);
-        fileData.getTimestamps().setClientStart();
         try {
-            fileData.setData(Files.readAllBytes(Paths.get(filename)));
-        } catch (IOException ignored) {
-            presenter.printInfo(String.format("can't upload file %s", filename));
-            return;
-        }
-        fileData.setData(new byte[]{1, 2, 3, 4});
-        fileData.setData(Compressor.compress(fileData.getData()));
-
-        Model.post(url, fileData, new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                presenter.printNetworkError();
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) {
-                if (!response.isSuccessful()) {
-                    presenter.printInfo(String.valueOf(response.code()));
-                    return;
+            FileUploader.uploadSingleFile(url, filename, new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    presenter.printNetworkError();
                 }
-                try (ResponseBody responseBody = response.body()) {
-                    if (responseBody == null) {
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) {
+                    if (!response.isSuccessful()) {
+                        presenter.printInfo(String.valueOf(response.code()));
                         return;
                     }
-                    Timestamps timestamps = gson.fromJson(responseBody.string(), Timestamps.class);
-                    timestamps.setClientEnd();
-                    Log.i("upload response", gson.toJson(timestamps));
-                } catch (IOException ignored) {
+                    try (ResponseBody responseBody = response.body()) {
+                        Timestamps timestamps = gson.fromJson(responseBody.string(), Timestamps.class);
+                        timestamps.setClientEnd();
+                        Log.i("upload response", gson.toJson(timestamps));
+                    } catch (IOException e) {
+                        Log.e("upload response", e.toString());
+                    }
                 }
-            }
-        });
+            });
+        } catch (IOException e) {
+            presenter.printInfo(String.format("can't upload file %s", filename));
+        }
     }
 
     @Override
@@ -122,14 +126,12 @@ public class ModelImpl implements Model {
                     return;
                 }
                 try (ResponseBody responseBody = response.body()) {
-                    if (responseBody == null) {
-                        return;
-                    }
                     FileData fileData = gson.fromJson(responseBody.string(), FileData.class);
                     fileData.setData(Compressor.decompress(fileData.getData()));
                     fileData.getTimestamps().setClientEnd();
                     Log.i("download response", gson.toJson(fileData));
-                } catch (IOException ignored) {
+                } catch (IOException e) {
+                    Log.e("download response", e.toString());
                 }
             }
         });
@@ -146,13 +148,23 @@ public class ModelImpl implements Model {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                presenter.printNetworkError();
             }
 
             @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                String[] display = response.body().string().split(":");
-                Log.i("TEST", Arrays.toString(display));
-                presenter.writeFilenames(display);
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                try (ResponseBody responseBody = response.body()) {
+                    if (!response.isSuccessful()) {
+                        presenter.printInfo(String.valueOf(response.code()));
+                        return;
+                    }
+                    String json = responseBody.string();
+                    String[] display = gson.fromJson(json, String[].class);
+                    Log.i("readAllFiles response", json);
+                    presenter.writeFilenames(display);
+                } catch (IOException e) {
+                    Log.e("readAllFiles response", e.toString());
+                }
             }
         });
     }
