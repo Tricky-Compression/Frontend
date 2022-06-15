@@ -55,7 +55,7 @@ public class ModelImpl implements Model {
                 .addPathSegments("upload/chunk")
                 .build();
         try {
-            FileUploader.upload(url, filename);
+            fileuploader.upload(url, filename);
         } catch (IOException e) {
             presenter.printInfo(String.format("can't upload file %s", filename));
         }

@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
+import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
@@ -17,6 +18,7 @@ public interface Model {
     MediaType JSON_FORMAT = MediaType.parse("application/json; charset=utf-8");
     OkHttpClient client = new OkHttpClient();
     Gson gson = new Gson();
+    FileUploader fileuploader = new FileUploader();
 
     static HttpUrl.Builder getBaseUrl() {
         return new HttpUrl.Builder().scheme("http").host(IP).port(PORT);
@@ -32,6 +34,13 @@ public interface Model {
         Log.i("request", gson.toJson(requestData));
         Request request = new Request.Builder().url(url).post(requestBody).build();
         client.newCall(request).enqueue(callback);
+    }
+
+    static Call nonBlockingPost(HttpUrl url, Object requestData) {
+        RequestBody requestBody = RequestBody.create(gson.toJson(requestData), JSON_FORMAT);
+        Log.i("request", gson.toJson(requestData));
+        Request request = new Request.Builder().url(url).post(requestBody).build();
+        return client.newCall(request);
     }
 
     void uploadSingleFile(String filename);
