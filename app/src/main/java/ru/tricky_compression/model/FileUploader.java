@@ -1,9 +1,11 @@
 package ru.tricky_compression.model;
 
+import android.os.Build;
 import android.util.Log;
 
 import com.google.gson.Gson;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -46,7 +48,7 @@ public class FileUploader {
         return (int) ((fileSize + chunkSize - 1) / chunkSize);
     }
 
-    private static final class UploadChunkTask implements Callable<Boolean> {
+    private static final class UploadChunkTask implements Callable<Long> {
         private final HttpUrl url;
         private final String filename;
         private final int chunkNumber;
@@ -67,7 +69,7 @@ public class FileUploader {
         }
 
         @Override
-        public Boolean call() {
+        public Long call() {
             ChunkData chunkData = new ChunkData(chunkNumber, filename);
             chunkData.getTimestamps().setClientStart();
             try (var channel = FileChannel.open(Paths.get(filename), StandardOpenOption.READ)) {
@@ -75,7 +77,7 @@ public class FileUploader {
                 chunkData.setData(ByteBufferUtils.toByteArray(buffer, size));
 //                chunkData.setData(Compressor.compress(chunkData.getData()));
             } catch (IOException ignored) {
-                return false;
+                return -1L;
             }
             try (Response response = Model.nonBlockingPost(url, chunkData).execute();
                  ResponseBody responseBody = response.body()) {
@@ -84,9 +86,9 @@ public class FileUploader {
                 /*System.out.println(gson.toJson(timestamps));
                 System.out.printf("Chunk #%d is sent\n", chunkNumber);
                 System.out.flush();*/
-                return true;
+                return timestamps.getClientEnd() - timestamps.getClientStart();
             } catch (IOException ignored) {
-                return false;
+                return -1L;
             }
         }
     }
@@ -106,20 +108,24 @@ public class FileUploader {
             try {
                 var threadPool = Executors.newCachedThreadPool();
 
-                List<Future<Boolean>> futures = new ArrayList<>(numberOfTasks);
+                List<Future<Long>> futures = new ArrayList<>(numberOfTasks);
                 for (int i = 0; i < numberOfTasks; ++i) {
                     long offset = (long) i * chunkSize;
                     int size = (int) Math.min(chunkSize, fileSize - offset);
-                    Callable<Boolean> task = new UploadChunkTask(url, filename, i, offset, size);
+                    Callable<Long> task = new UploadChunkTask(url, filename, i, offset, size);
                     futures.add(threadPool.submit(task));
                 }
 
                 boolean fail = false;
+                long totalTime = 0;
                 try {
                     for (var future : futures) {
-                        if (!future.get()) {
+                        long result = future.get();
+                        if (result < 0) {
                             fail = true;
                             break;
+                        } else {
+                            totalTime += result;
                         }
                     }
                 } catch (ExecutionException ignored) {
@@ -130,11 +136,11 @@ public class FileUploader {
                     threadPool.shutdownNow();
                     Log.i("chunk upload", "uploading failed");
                 } else {
-                    /*try (var fw = new FileWriter(Paths.get("src/test/res/timestamps.txt").toFile(), true)) {
-                        fw.write(totalTime + "\n");
+                    try (var fw = new FileWriter(Paths.get("src/test/res/timestamps.txt").toFile(), true)) {
+                        fw.write(this.getChunkSize() + " " + totalTime + "\n");
                     } catch (IOException ignored) {
                     }
-                    System.out.printf("total time %d ns", totalTime);*/
+                    System.out.printf("total time %d ns\n", totalTime);
                     System.out.printf("%d chunks are sent\n", numberOfTasks);
                     System.out.flush();
                 }
