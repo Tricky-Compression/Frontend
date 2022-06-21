@@ -1,5 +1,7 @@
 package ru.tricky_compression.view;
 
+import ru.tricky_compression.entity.ChunkData;
+
 public interface View {
     void printInfo(String text);
 
@@ -12,4 +14,6 @@ public interface View {
     void setPath(String text);
 
     void printFileNames(String[] toDisplay);
+
+    void showChunk(ChunkData chunkData);
 }

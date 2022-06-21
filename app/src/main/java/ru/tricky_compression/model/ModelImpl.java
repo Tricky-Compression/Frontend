@@ -15,6 +15,7 @@ import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import ru.tricky_compression.entity.ChunkData;
 import ru.tricky_compression.presenter.Presenter;
 import ru.tricky_compression.entity.FileData;
 import ru.tricky_compression.entity.Timestamps;
@@ -136,6 +137,46 @@ public class ModelImpl implements Model {
     }
 
     @Override
+    public void downloadChunk(String filename, int number) {
+        if (filename.isEmpty()) {
+            presenter.printInfo("Empty filename");
+            return;
+        }
+
+        HttpUrl url = Model.getBaseUrl()
+                .addPathSegment("api")
+                .addPathSegments("download/single_file")
+                .addQueryParameter("number", String.valueOf(number))
+                .addQueryParameter("filename", filename)
+                .addQueryParameter("clientStart", String.valueOf(System.nanoTime()))
+                .build();
+
+        Model.get(url, new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                presenter.printNetworkError();
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                if (!response.isSuccessful()) {
+                    presenter.printInfo(String.valueOf(response.code()));
+                    response.close();
+                    return;
+                }
+                try (ResponseBody responseBody = response.body()) {
+                    String json = responseBody.string();
+                    System.out.println(json);
+                    ChunkData chunkData = gson.fromJson(json, ChunkData.class);
+                    presenter.afterReceivingChunk(chunkData);
+                } catch (IOException e) {
+                    Log.e("download chunk response", e.toString());
+                }
+            }
+        });
+    }
+
+    @Override
     public void readAllFiles() {
         HttpUrl url = Model.getBaseUrl()
                 .addPathSegment("api")
@@ -146,13 +187,24 @@ public class ModelImpl implements Model {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                presenter.printNetworkError();
             }
 
             @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                String[] display = response.body().string().split(":");
-                Log.i("TEST", Arrays.toString(display));
-                presenter.writeFilenames(display);
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                try (ResponseBody responseBody = response.body()) {
+                    if (!response.isSuccessful()) {
+                        presenter.printInfo(String.valueOf(response.code()));
+                        System.out.println(response.body().string());
+                        return;
+                    }
+                    String json = responseBody.string();
+                    String[] display = gson.fromJson(json, String[].class);
+                    Log.i("readAllFiles response", json);
+                    presenter.writeFilenames(display);
+                } catch (IOException e) {
+                    Log.e("readAllFiles response", e.toString());
+                }
             }
         });
     }
