@@ -36,7 +36,7 @@ public interface Model {
         client.newCall(request).enqueue(callback);
     }
 
-    static Call nonBlockingPost(HttpUrl url, Object requestData) {
+    static Call blockingPost(HttpUrl url, Object requestData) {
         RequestBody requestBody = RequestBody.create(gson.toJson(requestData), JSON_FORMAT);
         Log.i("request", gson.toJson(requestData));
         Request request = new Request.Builder().url(url).post(requestBody).build();

@@ -1,6 +1,5 @@
 package ru.tricky_compression.model;
 
-import android.os.Build;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -79,7 +78,7 @@ public class FileUploader {
             } catch (IOException ignored) {
                 return -1L;
             }
-            try (Response response = Model.nonBlockingPost(url, chunkData).execute();
+            try (Response response = Model.blockingPost(url, chunkData).execute();
                  ResponseBody responseBody = response.body()) {
                 Timestamps timestamps = gson.fromJson(responseBody.string(), Timestamps.class);
                 timestamps.setClientEnd();

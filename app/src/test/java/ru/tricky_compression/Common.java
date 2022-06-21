@@ -1,20 +1,38 @@
 package ru.tricky_compression;
 
+import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Random;
+import java.util.stream.Stream;
+
+import ru.tricky_compression.entity.ChunkData;
 
 public interface Common {
     int MAX_FILE_SIZE = 1000000;
+    Gson gson = new Gson();
     Path RESOURCES = Paths.get("src", "test", "res");
     Random random = new Random();
 
-    static Path getFilename(int testNumber) {
+    static void cleanUpTimestamps() throws IOException {
+        Path timestamps = RESOURCES.resolve("timestamps.txt");
+        if (Files.exists(timestamps)) {
+            Files.delete(timestamps);
+        }
+        Files.createFile(timestamps);
+    }
+
+    static Path getFilename(Integer... args) {
         String baseFilename = Thread.currentThread().getStackTrace()[2].getMethodName();
-        return RESOURCES.resolve(String.format("%s%d.txt", baseFilename, testNumber));
+
+        var builder = new StringBuilder(baseFilename);
+        Stream.of(args).forEach(i -> builder.append('_').append(i));
+        builder.append(".txt");
+        return RESOURCES.resolve(builder.toString());
     }
 
     static String getChunk(int length) {
@@ -42,5 +60,21 @@ public interface Common {
         }
         Files.write(testFile, String.join("", chunks).getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
         return chunks;
+    }
+
+    static String emulateServer(String input, Path path) throws IOException {
+        ChunkData chunkData = gson.fromJson(input, ChunkData.class);
+        chunkData.getTimestamps().setServerStart();
+
+        Files.write(
+                path,
+                chunkData.getData(),
+                StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING
+        );
+        Files.delete(path);
+
+        chunkData.getTimestamps().setServerEnd();
+        return gson.toJson(chunkData.getTimestamps());
     }
 }
