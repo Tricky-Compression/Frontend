@@ -29,6 +29,11 @@ public interface Model {
         client.newCall(request).enqueue(callback);
     }
 
+    static Call blockingGet(HttpUrl url) {
+        Request request = new Request.Builder().url(url).build();
+        return client.newCall(request);
+    }
+
     static void post(HttpUrl url, Object requestData, Callback callback) {
         RequestBody requestBody = RequestBody.create(gson.toJson(requestData), JSON_FORMAT);
         Log.i("request", gson.toJson(requestData));

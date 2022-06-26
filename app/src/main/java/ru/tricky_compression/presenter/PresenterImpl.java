@@ -1,16 +1,5 @@
 package ru.tricky_compression.presenter;
 
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-
-import java.io.IOException;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.HttpUrl;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
 import ru.tricky_compression.entity.ChunkData;
 import ru.tricky_compression.model.Model;
 import ru.tricky_compression.model.ModelImpl;
@@ -56,7 +45,7 @@ public class PresenterImpl implements Presenter {
 
     @Override
     public void afterReceivingChunk(ChunkData chunkData) {
-        view.showChunk(chunkData);
+        // view.showChunk(chunkData);
     }
 
     @Override

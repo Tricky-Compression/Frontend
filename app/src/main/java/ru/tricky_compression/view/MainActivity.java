@@ -1,14 +1,24 @@
 package ru.tricky_compression.view;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.w3c.dom.Text;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import ru.tricky_compression.R;
 import ru.tricky_compression.entity.ChunkData;
@@ -18,6 +28,8 @@ import ru.tricky_compression.presenter.PresenterImpl;
 public class MainActivity extends AppCompatActivity implements View {
 
     private Presenter presenter;
+    private ViewFlipper viewFlipper;
+    private ArrayList<String> chunksCache;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements View {
     }
 
     private void init() {
+        chunksCache = new ArrayList<>();
         presenter = new PresenterImpl(this);
         findViewById(R.id.button_upload).setOnClickListener(view -> presenter.uploadSingleFile());
         findViewById(R.id.button_read).setOnClickListener(view -> presenter.readFilenames());
@@ -65,17 +78,20 @@ public class MainActivity extends AppCompatActivity implements View {
 
             listView.setOnItemClickListener((adapterView, view, i, l) -> {
                 String itemValue = (String) listView.getItemAtPosition(i);
-                presenter.sendChunkDownloadRequest(itemValue, 1);
+
+                Intent readIntent = new Intent(this, ReadActivity.class);
+                readIntent.putExtra("fileName", itemValue);
+                startActivity(readIntent);
             });
         });
     }
 
-    @Override
-    public void showChunk(ChunkData chunkData) {
-        runOnUiThread(() -> {
-            setContentView(R.layout.read_screen);
-            EditText readScreen = findViewById(R.id.text_read_chunk);
-            readScreen.setText(Arrays.toString(chunkData.getData()));
-        });
+
+    public void previousView(android.view.View v){
+        viewFlipper.showPrevious();
+    }
+
+    public void nextView(android.view.View view) {
+        viewFlipper.showNext();
     }
 }

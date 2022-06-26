@@ -145,7 +145,7 @@ public class ModelImpl implements Model {
 
         HttpUrl url = Model.getBaseUrl()
                 .addPathSegment("api")
-                .addPathSegments("download/single_file")
+                .addPathSegments("download/chunk")
                 .addQueryParameter("number", String.valueOf(number))
                 .addQueryParameter("filename", filename)
                 .addQueryParameter("clientStart", String.valueOf(System.nanoTime()))
