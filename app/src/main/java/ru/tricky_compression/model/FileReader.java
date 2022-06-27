@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -70,8 +71,8 @@ public class FileReader {
                     String json = responseBody.string();
                     System.out.println(json);
                     ChunkData chunkData = gson.fromJson(json, ChunkData.class);
-                    Log.i("SUCC", Arrays.toString(chunkData.getData()));
-                    chunksCache.put(chunkData.getChunkNumber(), Arrays.toString(chunkData.getData()));
+                    String converted = new String(chunkData.getData(), StandardCharsets.UTF_8);
+                    chunksCache.put(chunkData.getChunkNumber(), converted);
                 } catch (IOException e) {
                     Log.e("download chunk response", e.toString());
                 }
@@ -96,7 +97,6 @@ public class FileReader {
     }
 
     public String getCurrentChunk(){
-        Log.i("SIZE", String.valueOf(chunksCache.size()));
         CUR_CHUNK++;
         return chunksCache.get(CUR_CHUNK - 1);
     }

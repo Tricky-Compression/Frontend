@@ -54,8 +54,8 @@ public class ReadActivity extends AppCompatActivity implements View {
     public void showChunk() {
         TextView textView = new TextView(this);
         String display = fileReader.getCurrentChunk();
-        Log.i("BEBRA", "AA");
         textView.setText(display);
+        textView.setTextSize(30);
         viewFlipper.addView(textView);
     }
 
