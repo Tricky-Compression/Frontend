@@ -1,5 +1,6 @@
 package ru.tricky_compression.presenter;
 
+import ru.tricky_compression.entity.ChunkData;
 import ru.tricky_compression.model.Model;
 import ru.tricky_compression.model.ModelImpl;
 import ru.tricky_compression.view.View;
@@ -35,6 +36,16 @@ public class PresenterImpl implements Presenter {
     public void downloadSingleFile() {
         model.downloadSingleFile(view.getPath());
         view.cleanPath();
+    }
+
+    @Override
+    public void sendChunkDownloadRequest(String filename, int number) {
+        model.downloadChunk(filename, number);
+    }
+
+    @Override
+    public void afterReceivingChunk(ChunkData chunkData) {
+        // view.showChunk(chunkData);
     }
 
     @Override

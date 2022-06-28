@@ -15,12 +15,6 @@
         android:layout_margin="8dp"
         tools:layout="@layout/fragment_file_chooser" />
 
-    <ListView
-        android:id="@+id/list"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent">
-    </ListView>
-
     <TableRow
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -41,6 +35,7 @@
             android:layout_weight="1"
             android:text="@string/read" />
 
+
         <Button
             android:id="@+id/button_download"
             android:layout_width="wrap_content"
@@ -48,6 +43,13 @@
             android:layout_margin="1dp"
             android:layout_weight="1"
             android:text="@string/download" />
+
     </TableRow>
+
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"></ListView>
+
 
 </LinearLayout>

@@ -47,5 +47,7 @@ public interface Model {
 
     void downloadSingleFile(String filename);
 
+    void downloadChunk(String filename, int number);
+
     void readAllFiles();
 }

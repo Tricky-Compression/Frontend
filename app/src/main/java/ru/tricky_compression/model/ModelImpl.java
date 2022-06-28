@@ -12,9 +12,10 @@ import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import ru.tricky_compression.presenter.Presenter;
+import ru.tricky_compression.entity.ChunkData;
 import ru.tricky_compression.entity.FileData;
 import ru.tricky_compression.entity.Timestamps;
+import ru.tricky_compression.presenter.Presenter;
 
 public class ModelImpl implements Model {
     private final Presenter presenter;
@@ -132,6 +133,46 @@ public class ModelImpl implements Model {
                     Log.i("download response", gson.toJson(fileData));
                 } catch (IOException e) {
                     Log.e("download response", e.toString());
+                }
+            }
+        });
+    }
+
+    @Override
+    public void downloadChunk(String filename, int number) {
+        if (filename.isEmpty()) {
+            presenter.printInfo("Empty filename");
+            return;
+        }
+
+        HttpUrl url = Model.getBaseUrl()
+                .addPathSegment("api")
+                .addPathSegments("download/chunk")
+                .addQueryParameter("number", String.valueOf(number))
+                .addQueryParameter("filename", filename)
+                .addQueryParameter("clientStart", String.valueOf(System.nanoTime()))
+                .build();
+
+        Model.get(url, new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                presenter.printNetworkError();
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                if (!response.isSuccessful()) {
+                    presenter.printInfo(String.valueOf(response.code()));
+                    response.close();
+                    return;
+                }
+                try (ResponseBody responseBody = response.body()) {
+                    String json = responseBody.string();
+                    System.out.println(json);
+                    ChunkData chunkData = gson.fromJson(json, ChunkData.class);
+                    presenter.afterReceivingChunk(chunkData);
+                } catch (IOException e) {
+                    Log.e("download chunk response", e.toString());
                 }
             }
         });

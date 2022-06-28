@@ -52,7 +52,7 @@ public class FileChooserFragment extends Fragment {
     private void askPermissionAndBrowseFile()  {
         // With Android Level >= 23, you have to ask the user
         // for permission to access External Storage.
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) { // Level 23
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
 
             // Check if we have Call permission
             int permission = ActivityCompat.checkSelfPermission(this.getContext(),
