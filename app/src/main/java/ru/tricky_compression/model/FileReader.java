@@ -8,7 +8,6 @@ import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,13 +23,9 @@ public class FileReader {
     private static final Gson gson = new Gson();
     private static final int LEFT_CACHE = 1;
     private static final int RIGHT_CACHE = 3;
-    private static final int INITIAL_PAGES = 3;
-    private static final int CHUNKS_PER_PAGE = 1;
     private final String filename;
-    private int LEFT_CHUNK = 0;
     private int CUR_CHUNK = 0;
-    private int RIGHT_CHUNK = 3;
-    private Map<Integer, String> chunksCache;
+    private final Map<Integer, String> chunksCache;
     private ReadActivity readActivity;
 
     public FileReader(ReadActivity readActivity, String filename) {
@@ -56,14 +51,11 @@ public class FileReader {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 readActivity.printNetworkError();
-                Log.i("ERROR", String.valueOf(chunkNumber));
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
                 if (!response.isSuccessful()) {
-                    Log.i("ERROR", String.valueOf(chunkNumber));
-                    readActivity.printInfo(String.valueOf(response.code()));
                     response.close();
                     return;
                 }
@@ -97,7 +89,18 @@ public class FileReader {
     }
 
     public String getCurrentChunk(){
-        CUR_CHUNK++;
         return chunksCache.get(CUR_CHUNK - 1);
+    }
+
+    public void goRight(){
+        CUR_CHUNK++;
+    }
+
+    public void goLeft(){
+        CUR_CHUNK--;
+    }
+
+    public int getChunkNumber(){
+        return CUR_CHUNK;
     }
 }

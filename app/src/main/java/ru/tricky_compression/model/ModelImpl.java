@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -16,9 +15,9 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import ru.tricky_compression.entity.ChunkData;
-import ru.tricky_compression.presenter.Presenter;
 import ru.tricky_compression.entity.FileData;
 import ru.tricky_compression.entity.Timestamps;
+import ru.tricky_compression.presenter.Presenter;
 
 public class ModelImpl implements Model {
     private final Presenter presenter;

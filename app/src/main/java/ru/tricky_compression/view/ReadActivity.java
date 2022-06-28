@@ -1,7 +1,6 @@
 package ru.tricky_compression.view;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -61,11 +60,17 @@ public class ReadActivity extends AppCompatActivity implements View {
 
 
     public void previousView(android.view.View v) {
+        fileReader.goLeft();
+        if (fileReader.getChunkNumber() == 0) {
+            fileReader.goRight();
+            return;
+        }
         viewFlipper.showPrevious();
     }
 
     public void nextView(android.view.View view) {
         showChunk();
+        fileReader.goRight();
         viewFlipper.showNext();
     }
 

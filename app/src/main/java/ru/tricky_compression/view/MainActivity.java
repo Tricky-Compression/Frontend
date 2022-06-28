@@ -2,34 +2,21 @@ package ru.tricky_compression.view;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ViewFlipper;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-
 import ru.tricky_compression.R;
-import ru.tricky_compression.entity.ChunkData;
 import ru.tricky_compression.presenter.Presenter;
 import ru.tricky_compression.presenter.PresenterImpl;
 
 public class MainActivity extends AppCompatActivity implements View {
 
     private Presenter presenter;
-    private ViewFlipper viewFlipper;
-    private ArrayList<String> chunksCache;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,10 +26,21 @@ public class MainActivity extends AppCompatActivity implements View {
     }
 
     private void init() {
-        chunksCache = new ArrayList<>();
         presenter = new PresenterImpl(this);
         findViewById(R.id.button_upload).setOnClickListener(view -> presenter.uploadSingleFile());
         findViewById(R.id.button_read).setOnClickListener(view -> presenter.readFilenames());
+        findViewById(R.id.button_download).setOnClickListener(view -> {
+            AlertDialog.Builder button = new AlertDialog.Builder(this);
+            button.setTitle("Enter file name to download");
+            EditText input = new EditText(this);
+            button.setView(input);
+            button.setPositiveButton("OK", (dialog, whichButton) -> {
+                String downloadName = input.getText().toString();
+                presenter.downloadSingleFile();
+            });
+            button.setNegativeButton("CANCEL", null);
+            button.show();
+        });
     }
 
     @Override
@@ -67,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements View {
     }
 
     @Override
-    public void printFileNames(String [] toDisplay) {
+    public void printFileNames(String[] toDisplay) {
         runOnUiThread(() -> {
             ListView listView = findViewById(R.id.list);
 
@@ -84,14 +82,5 @@ public class MainActivity extends AppCompatActivity implements View {
                 startActivity(readIntent);
             });
         });
-    }
-
-
-    public void previousView(android.view.View v){
-        viewFlipper.showPrevious();
-    }
-
-    public void nextView(android.view.View view) {
-        viewFlipper.showNext();
     }
 }
