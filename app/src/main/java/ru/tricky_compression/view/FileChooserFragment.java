@@ -19,13 +19,13 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import ru.tricky_compression.R;
+import ru.tricky_compression.utils.FileChooserUtils;
 
 public class FileChooserFragment extends Fragment {
 
     private static final int MY_REQUEST_CODE_PERMISSION = 1000;
     private static final int MY_RESULT_CODE_FILE_CHOOSER = 2000;
 
-    private Button buttonBrowse;
     private EditText editTextPath;
 
     private static final String LOG_TAG = "AndroidExample";
@@ -35,37 +35,23 @@ public class FileChooserFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_file_chooser, container, false);
 
-        this.editTextPath = (EditText) rootView.findViewById(R.id.editText_path);
-        this.buttonBrowse = (Button) rootView.findViewById(R.id.button_browse);
+        this.editTextPath = rootView.findViewById(R.id.editText_path);
+        Button buttonBrowse = rootView.findViewById(R.id.button_browse);
 
-        this.buttonBrowse.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                askPermissionAndBrowseFile();
-            }
-
-        });
+        buttonBrowse.setOnClickListener(view -> askPermissionAndBrowseFile());
         return rootView;
     }
 
     private void askPermissionAndBrowseFile()  {
-        // With Android Level >= 23, you have to ask the user
-        // for permission to access External Storage.
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+        int permission = ActivityCompat.checkSelfPermission(this.getContext(),
+                Manifest.permission.READ_EXTERNAL_STORAGE);
 
-            // Check if we have Call permission
-            int permission = ActivityCompat.checkSelfPermission(this.getContext(),
-                    Manifest.permission.READ_EXTERNAL_STORAGE);
-
-            if (permission != PackageManager.PERMISSION_GRANTED) {
-                // If don't have permission so prompt the user.
-                this.requestPermissions(
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                        MY_REQUEST_CODE_PERMISSION
-                );
-                return;
-            }
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            this.requestPermissions(
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    MY_REQUEST_CODE_PERMISSION
+            );
+            return;
         }
         this.doBrowseFile();
     }
@@ -73,39 +59,29 @@ public class FileChooserFragment extends Fragment {
     private void doBrowseFile()  {
         Intent chooseFileIntent = new Intent(Intent.ACTION_GET_CONTENT);
         chooseFileIntent.setType("*/*");
-        // Only return URIs that can be opened with ContentResolver
+
         chooseFileIntent.addCategory(Intent.CATEGORY_OPENABLE);
 
         chooseFileIntent = Intent.createChooser(chooseFileIntent, "Choose a file");
         startActivityForResult(chooseFileIntent, MY_RESULT_CODE_FILE_CHOOSER);
     }
 
-    // When you have the request results
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+                                           String[] permissions, int[] grantResults) {
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        //
-        switch (requestCode) {
-            case MY_REQUEST_CODE_PERMISSION: {
+        if (requestCode == MY_REQUEST_CODE_PERMISSION) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                // Note: If request is cancelled, the result arrays are empty.
-                // Permissions granted (CALL_PHONE).
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.i(LOG_TAG, "Permission granted!");
+                Toast.makeText(this.getContext(), "Permission granted!", Toast.LENGTH_SHORT).show();
 
-                    Log.i( LOG_TAG,"Permission granted!");
-                    Toast.makeText(this.getContext(), "Permission granted!", Toast.LENGTH_SHORT).show();
-
-                    this.doBrowseFile();
-                }
-                // Cancelled or denied.
-                else {
-                    Log.i(LOG_TAG,"Permission denied!");
-                    Toast.makeText(this.getContext(), "Permission denied!", Toast.LENGTH_SHORT).show();
-                }
-                break;
+                this.doBrowseFile();
+            } else {
+                Log.i(LOG_TAG, "Permission denied!");
+                Toast.makeText(this.getContext(), "Permission denied!", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -113,29 +89,24 @@ public class FileChooserFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case MY_RESULT_CODE_FILE_CHOOSER:
-                if (resultCode == Activity.RESULT_OK ) {
-                    if(data != null)  {
-                        Uri fileUri = data.getData();
-                        Log.i(LOG_TAG, "Uri: " + fileUri);
+        if (requestCode == MY_RESULT_CODE_FILE_CHOOSER) {
+            if (resultCode == Activity.RESULT_OK) {
+                if (data != null) {
+                    Uri fileUri = data.getData();
+                    Log.i(LOG_TAG, "Uri: " + fileUri);
 
-                        String filePath = null;
-                        try {
-                            filePath = FileUtils.getPath(this.getContext(),fileUri);
-                        } catch (Exception e) {
-                            Log.e(LOG_TAG,"Error: " + e);
-                            Toast.makeText(this.getContext(), "Error: " + e, Toast.LENGTH_SHORT).show();
-                        }
-                        this.editTextPath.setText(filePath);
+                    String filePath = null;
+                    try {
+                        filePath = FileChooserUtils.getPath(this.getContext(), fileUri);
+                    } catch (Exception e) {
+                        Log.e(LOG_TAG, "Error: " + e);
+                        Toast.makeText(this.getContext(), "Error: " + e, Toast.LENGTH_SHORT).show();
                     }
+                    this.editTextPath.setText(filePath);
                 }
-                break;
+            }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    public String getPath()  {
-        return this.editTextPath.getText().toString();
-    }
 }
